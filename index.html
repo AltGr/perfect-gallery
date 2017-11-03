@@ -85,6 +85,7 @@ function show_full(i) {
   $('#gallery').css({
     'visibility': 'hidden'
   });
+  document.getElementById('img'+i).scrollIntoView();
   $('#fullimg').click(back_to_gallery);
   $(document).off("keydown");
   $(document).keydown(function(e) {
@@ -119,11 +120,11 @@ $.fn.perfectLayout = function(photos) {
 
   perfectRows.forEach(function (row) {
     row.forEach(function (img) {
-      var imgNode = $('<div class="image"></div>');
+      var imgNode = $('<div id="img'+img.data.index+'" class="image"></div>');
       imgNode.css({
         'width': img.width + 'px',
         'height': img.height + 'px',
-        'background': 'url(' + img.src + ')',
+        'background': 'url(' + (img.height <= 810 ? img.src : img.data.src) + ')',
         'background-size': 'cover'
       });
       imgNode.click(function () {show_full(img.data.index);});
