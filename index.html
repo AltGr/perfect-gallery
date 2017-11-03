@@ -1,9 +1,11 @@
 <!doctype html>
 <html>
 <head>
-  <title>Test photos</title>
+  <title>Photos</title>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <script src="jquery.min.js"></script>
+  <script src="perfectLayout.min.js"></script>
   <style type="text/css">
 body {
   margin: 0;
@@ -54,8 +56,6 @@ body {
 <div id="gallery"></div>
 <div id="fullimg"></div>
 
-<script src="jquery.min.js"></script>
-<script src="perfectLayout.min.js"></script>
 <script src="photos.json"></script>
 <script>
 photos.forEach(function(img,i) {
@@ -112,7 +112,7 @@ $.fn.perfectLayout = function(photos) {
   document.body.removeChild(scrollDiv);
 
   var width = $(this).width() - scrollbarWidth;
-  var height = $(this).height();
+  var height = screen.height;
 
   const perfectRows = perfectLayout(photos, width, height, {margin: 3});
   node.empty();
