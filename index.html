@@ -72,6 +72,9 @@ function back_to_gallery() {
   });
 }
 
+var preload_prev;
+var preload_next;
+
 function show_full(i) {
   if (i < 0 || i >= photos.length) {
     back_to_gallery();
@@ -101,6 +104,10 @@ function show_full(i) {
         break;
     }
   });
+  if (i >= 1)
+    preload_prev = (new Image()).src = photos[i-1].data.src;
+  if (i < photos.length - 1)
+    preload_next = (new Image()).src = photos[i+1].data.src;
 }
 
 $.fn.perfectLayout = function(photos) {
