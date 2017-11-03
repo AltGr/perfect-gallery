@@ -1,0 +1,144 @@
+<html>
+<head>
+  <title>Test photos</title>
+  <style type="text/css">
+body {
+  margin: 0;
+  padding: 0;
+}
+body {
+  background-color: black;
+  color: white;
+  margin: 0;
+  padding: 0;
+}
+#gallery {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: 3px;
+  padding: 0;
+  overflow: auto;
+}
+.image {
+  position: relative;
+  float: left;
+  margin: 3px;
+}
+#fullimg {
+  position: fixed;
+  top: 5;
+  bottom: 5;
+  left: 5;
+  right: 5;
+  display: none;
+}
+.fullimg {
+  margin: auto;
+  width: 100%;
+  height: 100%;
+  object-fit: scale-down;
+}
+.scrollbar-measure {
+  overflow: scroll;
+}
+  </style>
+</head>
+<body>
+
+<div id="gallery"></div>
+<div id="fullimg"></div>
+
+<script src="jquery.min.js"></script>
+<script src="perfectLayout.min.js"></script>
+<script src="photos.json"></script>
+<script>
+photos.forEach(function(img,i) {
+  img.data = { index: i, src: img.data }
+})
+
+function back_to_gallery() {
+  $(document).off("keydown");
+  $('#fullimg').css({
+    'display': 'none'
+  });
+  $('#gallery').css({
+    'visibility': 'visible'
+  });
+}
+
+function show_full(i) {
+  if (i < 0 || i >= photos.length) {
+    back_to_gallery();
+    return;
+  }
+  var img = photos[i];
+  $('#fullimg').css({
+    'display': 'block'
+  });
+  $('#fullimg').empty().append('<img class="fullimg" src="'+img.data.src+'">');
+  $('#gallery').css({
+    'visibility': 'hidden'
+  });
+  $('#fullimg').click(back_to_gallery);
+  $(document).off("keydown");
+  $(document).keydown(function(e) {
+    switch (e.which) {
+      case 37:
+        show_full(i-1);
+        break;
+      case 39: case 32: case 13:
+        show_full(i+1);
+        break;
+      case 27:
+        back_to_gallery();
+        break;
+    }
+  })
+}
+
+$.fn.perfectLayout = function(photos) {
+  const node = this;
+  // Get the scrollbar width
+  var scrollDiv = document.createElement("div");
+  scrollDiv.className = "scrollbar-measure";
+  document.body.appendChild(scrollDiv);
+  var scrollbarWidth = scrollDiv.offsetWidth - scrollDiv.clientWidth;
+  document.body.removeChild(scrollDiv);
+
+  var width = $(this).width() - scrollbarWidth;
+  var height = $(this).height();
+
+  const perfectRows = perfectLayout(photos, width, height, {margin: 3});
+  node.empty();
+
+  perfectRows.forEach(function (row) {
+    row.forEach(function (img) {
+      var imgNode = $('<div class="image"></div>');
+      imgNode.css({
+        'width': img.width + 'px',
+        'height': img.height + 'px',
+        'background': 'url(' + img.src + ')',
+        'background-size': 'cover'
+      });
+      imgNode.click(function () {show_full(img.data.index);});
+      node.append(imgNode);
+    });
+  });
+};
+
+$(document).ready(function() {
+  var gallery = $('#gallery');
+
+  gallery.perfectLayout(photos);
+
+  $(window).resize(function() {
+    gallery.perfectLayout(photos);
+  });
+  $(window).trigger('resize');
+});
+
+</script>
+</body>
