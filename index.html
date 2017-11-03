@@ -1,6 +1,9 @@
+<!doctype html>
 <html>
 <head>
   <title>Test photos</title>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <style type="text/css">
 body {
   margin: 0;
@@ -29,10 +32,10 @@ body {
 }
 #fullimg {
   position: fixed;
-  top: 5;
-  bottom: 5;
-  left: 5;
-  right: 5;
+  top: 5px;
+  bottom: 5px;
+  left: 5px;
+  right: 5px;
   display: none;
 }
 .fullimg {
@@ -96,7 +99,7 @@ function show_full(i) {
         back_to_gallery();
         break;
     }
-  })
+  });
 }
 
 $.fn.perfectLayout = function(photos) {
