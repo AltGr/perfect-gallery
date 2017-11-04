@@ -18,11 +18,6 @@ body {
   padding: 0;
 }
 #gallery {
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
   margin: 3px;
   padding: 0;
   overflow: auto;
@@ -32,7 +27,7 @@ body {
   float: left;
   margin: 3px;
 }
-#fullimg {
+#fullimg_div {
   position: fixed;
   top: 5px;
   bottom: 5px;
@@ -40,7 +35,8 @@ body {
   right: 5px;
   display: none;
 }
-.fullimg {
+#full_img {
+  position: absolute;
   margin: auto;
   width: 100%;
   height: 100%;
@@ -49,12 +45,36 @@ body {
 .scrollbar-measure {
   overflow: scroll;
 }
+#prev_btn, #next_btn {
+  position: absolute;
+  height: 100%;
+  width: 20%;
+  color: rgba(96,96,96,0.0);
+  display: table;
+}
+#prev_btn {
+  left: 0;
+}
+#next_btn {
+  right: 0;
+}
+#prev_btn span, #next_btn span {
+  display: table-cell;
+  text-align: center;
+  vertical-align: middle;
+  font-size: 60px;
+}
+#prev_btn:hover, #next_btn:hover {
+  background-color: rgba(96,96,96,0.5);
+  color: rgba(0,0,0,0.5);
+}
+
   </style>
 </head>
 <body>
 
 <div id="gallery"></div>
-<div id="fullimg"></div>
+<div id="fullimg_div"></div>
 
 <script src="photos.json"></script>
 <script>
@@ -62,64 +82,62 @@ photos.forEach(function(img,i) {
   img.data = { index: i, src: img.data }
 })
 
-function back_to_gallery() {
+function back_to_gallery(i) {
   $(document).off("keydown");
-  $('#fullimg').css({
+  $('#fullimg_div').css({
     'display': 'none'
   });
   $('#gallery').css({
-    'visibility': 'visible'
-  });
-}
-
-var preload_prev;
-var preload_next;
-
-function show_full(i) {
-  if (i < 0 || i >= photos.length) {
-    back_to_gallery();
-    return;
-  }
-  var img = photos[i];
-  $('#fullimg').css({
     'display': 'block'
   });
-  $('#fullimg').empty().append('<img class="fullimg" src="'+img.data.src+'">');
-  $('#gallery').css({
-    'visibility': 'hidden'
-  });
   document.getElementById('img'+i).scrollIntoView();
-  $('#fullimg').click(back_to_gallery);
-  $(document).off("keydown");
-  $(document).keydown(function(e) {
+}
+
+var preload_prev = new Image();
+var preload_next = new Image();
+
+function show_full(i) {
+  if (i < 0) { back_to_gallery(0); return; }
+  else if (i >= photos.length) { back_to_gallery(photos.length - 1); return; }
+
+  var img = photos[i];
+  $('#fullimg_div').css({
+    'display': 'block'
+  });
+  $('#fullimg_div').empty()
+    .append('<img id="full_img" src="'+img.data.src+'">')
+    .append('<div id="prev_btn"><span>◀</span></div>')
+    .append('<div id="next_btn"><span>▶</span></div>');
+  $('#gallery').css({
+    'display': 'none'
+  });
+  $('#fullimg_div').off('click').click(function(){back_to_gallery(i);});
+  $('#prev_btn').off('click')
+    .click(function(e){show_full(i-1); e.stopPropagation();});
+  $('#next_btn').off('click')
+    .click(function(e){show_full(i+1); e.stopPropagation();});
+  $(document).off("keydown").keydown(function(e) {
     switch (e.which) {
-      case 37:
+      case 37: case 8:
         show_full(i-1);
         break;
       case 39: case 32: case 13:
         show_full(i+1);
         break;
       case 27:
-        back_to_gallery();
+        back_to_gallery(i);
         break;
     }
   });
-  if (i >= 1)
-    preload_prev = (new Image()).src = photos[i-1].data.src;
-  if (i < photos.length - 1)
-    preload_next = (new Image()).src = photos[i+1].data.src;
+  $('#full_img').off('load').on('load', function() {
+    if (i >= 1) preload_prev.src = photos[i-1].data.src;
+    if (i < photos.length - 1) preload_next.src = photos[i+1].data.src;
+  });
 }
 
 $.fn.perfectLayout = function(photos) {
   const node = this;
-  // Get the scrollbar width
-  var scrollDiv = document.createElement("div");
-  scrollDiv.className = "scrollbar-measure";
-  document.body.appendChild(scrollDiv);
-  var scrollbarWidth = scrollDiv.offsetWidth - scrollDiv.clientWidth;
-  document.body.removeChild(scrollDiv);
-
-  var width = $(this).width() - scrollbarWidth;
+  var width = $(this).width();
   var height = screen.height;
 
   const perfectRows = perfectLayout(photos, width, height, {margin: 3});
