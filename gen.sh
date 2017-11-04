@@ -6,7 +6,10 @@ OUT="$DIR/photos.json"
 
 mkdir -p "$DIR/large"
 mkdir -p "$DIR/thumbs"
-cp index.html jquery.min.js perfectLayout.min.js "$DIR"
+cp index.html "$DIR"
+wget -O $DIR/jquery.min.js https://code.jquery.com/jquery-2.2.4.min.js
+wget -O $DIR/perfectLayout.min.js https://raw.githubusercontent.com/axyz/perfect-layout/d56bc2d9c5212e5d79ff63994ef434a3ec2acd16/dist/perfectLayout.min.js
+
 
 echo "var photos = [" >"$OUT"
 i=0
