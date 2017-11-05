@@ -7,9 +7,8 @@
   <script src="jquery.min.js"></script>
   <script src="perfectLayout.min.js"></script>
   <style type="text/css">
-body {
-  margin: 0;
-  padding: 0;
+html {
+  background-color: black;
 }
 body {
   background-color: black;
@@ -158,6 +157,27 @@ function show_full(i) {
   });
 }
 
+function toggleFullScreen() {
+  if ((document.fullScreenElement && document.fullScreenElement !== null) ||
+      (!document.mozFullScreen && !document.webkitIsFullScreen)) {
+    if (document.documentElement.requestFullScreen) {
+      document.documentElement.requestFullScreen();
+    } else if (document.documentElement.mozRequestFullScreen) {
+      document.documentElement.mozRequestFullScreen();
+    } else if (document.documentElement.webkitRequestFullScreen) {
+      document.documentElement.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
+    }
+  } else {
+    if (document.cancelFullScreen) {
+      document.cancelFullScreen();
+    } else if (document.mozCancelFullScreen) {
+      document.mozCancelFullScreen();
+    } else if (document.webkitCancelFullScreen) {
+      document.webkitCancelFullScreen();
+    }
+  }
+}
+
 $(document).ready(function() {
   const gallery = $('#gallery');
 
@@ -167,9 +187,9 @@ $(document).ready(function() {
       .css({'background': 'url('+img.src+') #444', 'background-size': 'cover'})
       .click(function () {show_full(img.data.index);}));
   });
-
   perfect_resize();
   $(window).resize(perfect_resize);
+  $('body').dblclick(function(e){toggleFullScreen(); e.stopPropagation();});
 });
 </script>
 </body>
