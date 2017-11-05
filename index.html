@@ -80,9 +80,11 @@ photos.forEach(function(img,i) {
   img.data = { index: i, src: img.data }
 })
 
+var scroll_pos = 0.;
+
 function perfect_resize() {
   const width = $(window).width() - 3;
-  var height = screen.height;
+  const height = screen.height;
 
   const perfectRows = perfectLayout(photos, width, height, {margin: 3});
 
@@ -99,6 +101,8 @@ function perfect_resize() {
         });
     });
   });
+  if (scroll_pos > 0.)
+    $(window).scrollTop(scroll_pos * $(document).height());
 }
 
 function back_to_gallery(i) {
@@ -189,7 +193,10 @@ $(document).ready(function() {
   });
   perfect_resize();
   $(window).resize(perfect_resize);
-  $('body').dblclick(function(e){toggleFullScreen(); e.stopPropagation();});
+  $('body').dblclick(toggleFullScreen);
+  $(window).scroll(function(){
+    scroll_pos = $(window).scrollTop() / $(document).height();
+  });
 });
 </script>
 </body>
