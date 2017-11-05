@@ -2,7 +2,7 @@
 
 DIR="$1"; shift
 PHOTOS=("$@")
-OUT="$DIR/photos.json"
+OUT="$DIR/photos.js"
 
 mkdir -p "$DIR/large"
 mkdir -p "$DIR/thumbs"

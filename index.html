@@ -16,11 +16,12 @@ body {
   color: white;
   margin: 0;
   padding: 0;
+  overflow-y: scroll;
 }
 #gallery {
   margin: 3px;
   padding: 0;
-  overflow: auto;
+  margin-right: 0;
 }
 .image {
   position: relative;
@@ -28,11 +29,12 @@ body {
   margin: 3px;
 }
 #fullimg_div {
-  position: fixed;
+  position: absolute;
   top: 5px;
   bottom: 5px;
   left: 5px;
   right: 5px;
+  margin: auto;
   display: none;
 }
 #full_img {
@@ -40,13 +42,10 @@ body {
   margin: auto;
   width: 100%;
   height: 100%;
-  object-fit: scale-down;
-}
-.scrollbar-measure {
-  overflow: scroll;
+  object-fit: contain;
 }
 #prev_btn, #next_btn {
-  position: absolute;
+  position: fixed;
   height: 100%;
   width: 20%;
   color: rgba(255,255,255,0.0);
@@ -76,20 +75,43 @@ body {
 <div id="gallery"></div>
 <div id="fullimg_div"></div>
 
-<script src="photos.json"></script>
+<script src="photos.js"></script>
 <script>
 photos.forEach(function(img,i) {
   img.data = { index: i, src: img.data }
 })
 
+function perfect_resize() {
+  const width = $(window).width() - 3;
+  var height = screen.height;
+
+  const perfectRows = perfectLayout(photos, width, height, {margin: 3});
+
+  perfectRows.forEach(function (row) {
+    row.forEach(function (img) {
+      $('#img'+img.data.index).css({
+        'width': img.width + 'px',
+        'height': img.height + 'px'
+      });
+      if (img.height > 810)
+        $('#img'+img.data.index).css({
+          'background': 'url(' + img.data.src + ') #444',
+          'background-size': 'cover'
+        });
+    });
+  });
+}
+
 function back_to_gallery(i) {
   $(document).off("keydown");
+  $('body').css({'overflow-y':'scroll'});
   $('#fullimg_div').css({
     'display': 'none'
   });
   $('#gallery').css({
     'display': 'block'
   });
+  perfect_resize();
   document.getElementById('img'+i).scrollIntoView();
 }
 
@@ -100,12 +122,13 @@ function show_full(i) {
   if (i < 0) { back_to_gallery(0); return; }
   else if (i >= photos.length) { back_to_gallery(photos.length - 1); return; }
 
-  var img = photos[i];
+  const img = photos[i];
   $('#fullimg_div').css({
     'display': 'block'
   });
+  $('body').css({'overflow-y':'auto'});
   $('#fullimg_div').empty()
-    .append('<img id="full_img" src="'+img.data.src+'">')
+    .append('<img id="full_img" src="'+img.data.src+'"></img>')
     .append('<div id="prev_btn"><span>◀</span></div>')
     .append('<div id="next_btn"><span>▶</span></div>');
   $('#gallery').css({
@@ -135,39 +158,18 @@ function show_full(i) {
   });
 }
 
-$.fn.perfectLayout = function(photos) {
-  const node = this;
-  var width = $(this).width();
-  var height = screen.height;
-
-  const perfectRows = perfectLayout(photos, width, height, {margin: 3});
-  node.empty();
-
-  perfectRows.forEach(function (row) {
-    row.forEach(function (img) {
-      var imgNode = $('<div id="img'+img.data.index+'" class="image"></div>');
-      imgNode.css({
-        'width': img.width + 'px',
-        'height': img.height + 'px',
-        'background': 'url(' + (img.height <= 810 ? img.src : img.data.src) + ') #444',
-        'background-size': 'cover'
-      });
-      imgNode.click(function () {show_full(img.data.index);});
-      node.append(imgNode);
-    });
-  });
-};
-
 $(document).ready(function() {
-  var gallery = $('#gallery');
+  const gallery = $('#gallery');
 
-  gallery.perfectLayout(photos);
-
-  $(window).resize(function() {
-    gallery.perfectLayout(photos);
+  photos.forEach(function (img) {
+    gallery.append(
+      $('<div id="img'+img.data.index+'" class="image"></div>')
+      .css({'background': 'url('+img.src+') #444', 'background-size': 'cover'})
+      .click(function () {show_full(img.data.index);}));
   });
-  $(window).trigger('resize');
-});
 
+  perfect_resize();
+  $(window).resize(perfect_resize);
+});
 </script>
 </body>
