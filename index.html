@@ -84,7 +84,7 @@ var scroll_pos = 0.;
 
 function perfect_resize() {
   const width = $(window).width() - 3;
-  const height = screen.height;
+  const height = Math.min(screen.height, 1080);
 
   const perfectRows = perfectLayout(photos, width, height, {margin: 3});
 

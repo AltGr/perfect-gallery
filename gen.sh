@@ -26,7 +26,7 @@ for p in "${PHOTOS[@]}"; do
     esac
     base=$(basename $p)
     convert -auto-orient -resize 1920x1920\> -interlace Plane -quality 75% "$p" "$DIR/large/$base"
-    convert -auto-orient -thumbnail 540x540\> -strip -interlace Plane -quality 60% "$p" "$DIR/thumbs/$base"
+    convert -auto-orient -thumbnail 640x640\> -strip -interlace Plane -quality 64% "$p" "$DIR/thumbs/$base"
     if [ $i -ne 0 ]; then echo "," >>"$OUT"; fi
     echo -n "  { data: \"large/$base\", src: \"thumbs/$base\", ratio: $RATIO }" >>"$OUT"
     i=$((i+1))
