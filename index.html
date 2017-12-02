@@ -74,12 +74,9 @@ body {
 <div id="gallery"></div>
 <div id="fullimg_div"></div>
 
-<script src="photos.js"></script>
 <script>
-photos.forEach(function(img,i) {
-  img.data = { index: i, src: img.data }
-})
 
+var photos = [];
 var scroll_pos = 0.;
 var last_width = 0;
 var last_height = 0;
@@ -188,8 +185,15 @@ function toggleFullScreen() {
   }
 }
 
-$(document).ready(function() {
+function start_gallery(album) {
+  if (document.readyState !== "complete" || photos == []) return;
+
   const gallery = $('#gallery');
+
+  photos.forEach(function(img,i) {
+    img.src = album +"/"+ img.src;
+    img.data = { index: i, src: album +"/"+ img.data }
+  });
 
   photos.forEach(function (img) {
     gallery.append(
@@ -203,6 +207,23 @@ $(document).ready(function() {
   $(window).scroll(function(){
     scroll_pos = $(window).scrollTop() / $(document).height();
   });
+}
+
+var album;
+if (window.location.search)
+  album = window.location.search.substring(1) + "/";
+else
+  album = "";
+
+fetch ("photos/"+album+"photos.json")
+  .then(function(response) { return response.json(); })
+  .then(function(json) {
+    photos = json;
+    start_gallery(album);
+  });
+
+$(document).ready(function() {
+  start_gallery(album);
 });
 </script>
 </body>

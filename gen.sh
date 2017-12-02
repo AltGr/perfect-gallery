@@ -2,7 +2,7 @@
 
 DIR="$1"; shift
 PHOTOS=("$@")
-OUT="$DIR/photos.js"
+OUT="$DIR/photos.json"
 
 mkdir -p "$DIR/large"
 mkdir -p "$DIR/thumbs"
@@ -16,7 +16,7 @@ cp index.html "$DIR"
 cp jquery.min.js "$DIR"
 cp perfectLayout.min.js "$DIR"
 
-echo "var photos = [" >"$OUT"
+echo "[" >"$OUT"
 i=0
 for p in "${PHOTOS[@]}"; do
     read w h orient < <(identify -format '%w %h %[EXIF:Orientation]\n' $p)
@@ -28,13 +28,13 @@ for p in "${PHOTOS[@]}"; do
     convert -auto-orient -resize 1920x1920\> -interlace Plane -quality 75% "$p" "$DIR/large/$base"
     convert -auto-orient -thumbnail 640x640\> -strip -interlace Plane -quality 64% "$p" "$DIR/thumbs/$base"
     if [ $i -ne 0 ]; then echo "," >>"$OUT"; fi
-    echo -n "  { data: \"large/$base\", src: \"thumbs/$base\", ratio: $RATIO }" >>"$OUT"
+    LC_ALL=C printf '  { "data": "large/%s", "src": "thumbs/%s", "ratio": %f }' "$base" "$base" "$RATIO" >>"$OUT"
     i=$((i+1))
     printf "\r[KResizing images: %02d%%" $((i * 100 / ${#PHOTOS[*]}))
 done
 echo
 
 echo >>"$OUT"
-echo "];" >>"$OUT"
+echo "]" >>"$OUT"
 
 xdg-open "$DIR/index.html"
