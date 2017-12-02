@@ -1,20 +1,24 @@
 #!/bin/bash -ue
 
 DIR="$1"; shift
-PHOTOS=("$@")
+if [ $# -gt 0 ]; then
+    PHOTOS=("$@")
+else
+  readarray -t PHOTOS
+fi
 OUT="$DIR/photos.json"
 
 mkdir -p "$DIR/large"
 mkdir -p "$DIR/thumbs"
-if [ ! -e jquery.min.js ]; then
-    wget -O jquery.min.js https://code.jquery.com/jquery-2.2.4.min.js
-fi
-if [ ! -e perfectLayout.min.js ]; then
-    wget -O perfectLayout.min.js https://raw.githubusercontent.com/axyz/perfect-layout/d56bc2d9c5212e5d79ff63994ef434a3ec2acd16/dist/perfectLayout.min.js
-fi
-cp index.html "$DIR"
-cp jquery.min.js "$DIR"
-cp perfectLayout.min.js "$DIR"
+# if [ ! -e jquery.min.js ]; then
+#     wget -O jquery.min.js https://code.jquery.com/jquery-2.2.4.min.js
+# fi
+# if [ ! -e perfectLayout.min.js ]; then
+#     wget -O perfectLayout.min.js https://raw.githubusercontent.com/axyz/perfect-layout/d56bc2d9c5212e5d79ff63994ef434a3ec2acd16/dist/perfectLayout.min.js
+# fi
+# cp index.html "$DIR"
+# cp jquery.min.js "$DIR"
+# cp perfectLayout.min.js "$DIR"
 
 echo "[" >"$OUT"
 i=0
@@ -37,4 +41,4 @@ echo
 echo >>"$OUT"
 echo "]" >>"$OUT"
 
-xdg-open "$DIR/index.html"
+# xdg-open "$DIR/index.html"
