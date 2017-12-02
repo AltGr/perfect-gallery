@@ -25,7 +25,7 @@ i=0
 for p in "${PHOTOS[@]}"; do
     read w h orient < <(identify -format '%w %h %[EXIF:Orientation]\n' $p)
     case "$orient" in
-        1|3) RATIO=$(bc -l <<<"$w / $h") ;;
+        1|3|"") RATIO=$(bc -l <<<"$w / $h") ;;
         *) RATIO=$(bc -l <<<"$h / $w")
     esac
     base=$(basename $p)
