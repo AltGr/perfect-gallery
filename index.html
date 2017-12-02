@@ -191,8 +191,8 @@ function start_gallery(album) {
   const gallery = $('#gallery');
 
   photos.forEach(function(img,i) {
-    img.src = album +"/"+ img.src;
-    img.data = { index: i, src: album +"/"+ img.data }
+    img.src = album + img.src;
+    img.data = { index: i, src: album + img.data }
   });
 
   photos.forEach(function (img) {
@@ -215,7 +215,7 @@ if (window.location.search)
 else
   album = "";
 
-fetch ("photos/"+album+"photos.json")
+fetch (album+"photos.json")
   .then(function(response) { return response.json(); })
   .then(function(json) {
     photos = json;
