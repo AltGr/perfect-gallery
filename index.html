@@ -205,12 +205,24 @@ if (window.location.search)
 else
   album = "";
 
-fetch (album+"photos.json")
-  .then(function(response) { return response.json(); })
-  .then(function(json) {
-    photos = json;
-    start_gallery(album);
-  });
+if (self.fetch) {
+  console.log("using fetch");
+  fetch (album+"photos.json")
+    .then(function(response) { return response.json(); })
+    .then(function(json) {
+      photos = json;
+      start_gallery(album);
+    });
+} else {
+  console.log("using XMLHttpRequest");
+  var req = new XMLHttpRequest();
+  req.addEventListener("load", function () {
+      photos = JSON.parse(this.responseText);
+      start_gallery(album);
+    });
+  req.open("GET", album+"photos.json");
+  req.send();
+}
 
 $(document).ready(function() {
   start_gallery(album);
