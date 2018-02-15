@@ -162,7 +162,7 @@ function show_full(i) {
   });
 }
 
-function toggleFullScreen() {
+function setFullScreen() {
   if ((document.fullScreenElement && document.fullScreenElement !== null) ||
       (!document.mozFullScreen && !document.webkitIsFullScreen)) {
     if (document.documentElement.requestFullScreen) {
@@ -171,14 +171,6 @@ function toggleFullScreen() {
       document.documentElement.mozRequestFullScreen();
     } else if (document.documentElement.webkitRequestFullScreen) {
       document.documentElement.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
-    }
-  } else {
-    if (document.cancelFullScreen) {
-      document.cancelFullScreen();
-    } else if (document.mozCancelFullScreen) {
-      document.mozCancelFullScreen();
-    } else if (document.webkitCancelFullScreen) {
-      document.webkitCancelFullScreen();
     }
   }
 }
@@ -201,7 +193,7 @@ function start_gallery(album) {
   });
   perfect_resize();
   $(window).resize(perfect_resize);
-  $('body').dblclick(toggleFullScreen);
+  $('body').click(setFullScreen);
   $(window).scroll(function(){
     scroll_pos = $(window).scrollTop() / $(document).height();
   });
