@@ -20,7 +20,6 @@ body {
 #gallery {
   margin: 3px;
   padding: 0;
-  margin-right: 0;
 }
 .image {
   position: relative;
@@ -83,7 +82,7 @@ var last_width = 0;
 var last_height = 0;
 
 function perfect_resize() {
-  const width = $(window).width() - 3;
+  const width = $(window).width() - 6;
   const height = Math.min(screen.height, 1080);
 
   if (width === last_width && height === last_height) return;
@@ -93,9 +92,12 @@ function perfect_resize() {
   const perfectRows = perfectLayout(photos, width, height, {margin: 3});
 
   perfectRows.forEach(function (row) {
-    row.forEach(function (img) {
+    var rem_width = width;
+    row.forEach(function (img, i) {
+      const w = (i == row.length - 1) ? rem_width - 6 : img.width;
+      rem_width -= w + 6;
       $('#img'+img.data.index).css({
-        'width': img.width + 'px',
+        'width': w + 'px',
         'height': img.height + 'px'
       });
       if (img.height > 810)
