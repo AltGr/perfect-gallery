@@ -67,26 +67,12 @@ body {
   color: rgba(0,0,0,0.5);
 }
 
-#fullscreen_button {
-  position: fixed;
-  background-color: black;
-  text-color: white;
-  top: 0;
-  right: 0;
-  width: 25px;
-  height: 22px;
-  border-radius: 0 0 0 5px;
-  text-align: center;
-  vertical-align: middle;
-}
-
   </style>
 </head>
 <body>
 
 <div id="gallery"></div>
 <div id="fullimg_div"></div>
-<div id="fullscreen_button">▣</div>
 
 <script>
 
@@ -196,15 +182,6 @@ function start_gallery(album) {
 
   const gallery = $('#gallery');
 
-  $(document).addEventListener(
-    'webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange',
-    function () {
-      const disp =
-            (!document.webkitIsFullScreen || !document.mozFullScreen || !document.msFullscreenElement) ?
-            'none' : 'block';
-      $('#fullscreen_button').css({ 'display': disp })},
-    false);
-
   photos.forEach(function(img,i) {
     img.src = album + img.src;
     img.data = { index: i, src: album + img.data }
@@ -218,7 +195,7 @@ function start_gallery(album) {
   });
   perfect_resize();
   $(window).resize(perfect_resize);
-  $('#fullscreen_button').click(setFullScreen);
+  $('body').click(setFullScreen);
   $(window).scroll(function(){
     scroll_pos = $(window).scrollTop() / $(document).height();
   });
