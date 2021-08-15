@@ -33,7 +33,7 @@ body {
   bottom: 5px;
   left: 5px;
   right: 5px;
-  margin: auto;
+  margin: 0;
   display: none;
 }
 #full_img {
@@ -47,14 +47,18 @@ body {
   position: fixed;
   height: 100%;
   width: 20%;
-  color: rgba(255,255,255,0.0);
   display: table;
+  background-color: rgba(255,255,255,0.2);
+  color: rgba(0,0,0,0.5);
+  opacity: 0;
 }
 #prev_btn {
   left: 0;
+  top: 0;
 }
 #next_btn {
   right: 0;
+  bottom: 0;
 }
 #prev_btn span, #next_btn span {
   display: table-cell;
@@ -63,10 +67,45 @@ body {
   font-size: 60px;
 }
 #prev_btn:hover, #next_btn:hover {
-  background-color: rgba(255,255,255,0.2);
-  color: rgba(0,0,0,0.5);
+  opacity: 1;
+  animation: none;
 }
-
+@media only screen and (hover: none) and (pointer: coarse) {
+  #prev_btn, #next_btn {
+      animation: 1s fade-out forwards;
+  }
+  @keyframes fade-out {
+      from {
+          opacity: 1;
+      }
+      to {
+          opacity: 0;
+      }
+  }
+  @media (orientation: portrait) {
+      #prev_btn, #next_btn {
+          width: 100%;
+          height: 20%;
+      }
+      #prev_btn span, #next_btn  span {
+          transform: rotate(90deg);
+      }
+      #full_img.landscape {
+          transform: rotate(90deg) translate(0,-100%);
+          transform-origin: 0 0;
+          width: calc(100vh - 10px);
+          height: calc(100vw - 10px);
+      }
+  }
+  @media (orientation: landscape) {
+      #full_img.portrait {
+          transform: rotate(-90deg) translate(-100%,0);
+          transform-origin: 0 0;
+          width: calc(100vh - 10px);
+          height: calc(100vw - 10px);
+      }
+  }
+}
   </style>
 </head>
 <body>
@@ -82,7 +121,7 @@ var last_width = 0;
 var last_height = 0;
 
 function perfect_resize() {
-  const width = $(window).width() - 6;
+  const width = document.getElementById("gallery").clientWidth - 6;
   const height = Math.min(screen.height, 1080);
 
   if (width === last_width && height === last_height) return;
@@ -94,7 +133,7 @@ function perfect_resize() {
   perfectRows.forEach(function (row) {
     var rem_width = width;
     row.forEach(function (img, i) {
-      const w = (i == row.length - 1) ? rem_width - 6 : img.width;
+      const w = (i == row.length - 1) ? rem_width - 1 : img.width;
       rem_width -= w + 6;
       $('#img'+img.data.index).css({
         'width': w + 'px',
@@ -118,6 +157,7 @@ function back_to_gallery(i) {
     'display': 'block'
   });
   perfect_resize();
+  screen.orientation.unlock();
   document.getElementById('img'+i).scrollIntoView();
 }
 
@@ -132,9 +172,11 @@ function show_full(i) {
   $('#fullimg_div').css({
     'display': 'block'
   });
+  let cls = img.ratio > 1 ? "landscape" : "portrait";
+  screen.orientation.lock("any");
   $('body').css({'overflow-y':'auto'});
   $('#fullimg_div').empty()
-    .append('<img id="full_img" src="'+img.data.src+'"></img>')
+    .append('<img id="full_img" class="'+cls+'" src="'+img.data.src+'"></img>')
     .append('<div id="prev_btn"><span>◀</span></div>')
     .append('<div id="next_btn"><span>▶</span></div>');
   $('#gallery').css({
