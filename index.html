@@ -4,8 +4,8 @@
   <title>Photos</title>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <script src="jquery.min.js"></script>
-  <script src="perfectLayout.min.js"></script>
+  <script src="/photos/jquery.min.js"></script>
+  <script src="/photos/perfectLayout.min.js"></script>
   <style type="text/css">
 html {
   background-color: black;
@@ -208,7 +208,7 @@ else
   album = "";
 
 if (self.fetch) {
-  console.log("using fetch");
+  console.log("using fetch "+album);
   fetch (album+"photos.json")
     .then(function(response) { return response.json(); })
     .then(function(json) {
@@ -216,7 +216,7 @@ if (self.fetch) {
       start_gallery(album);
     });
 } else {
-  console.log("using XMLHttpRequest");
+  console.log("using XMLHttpRequest "+album);
   var req = new XMLHttpRequest();
   req.addEventListener("load", function () {
       photos = JSON.parse(this.responseText);
