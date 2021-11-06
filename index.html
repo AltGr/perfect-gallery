@@ -7,6 +7,7 @@
   <script src="/photos/jquery.min.js"></script>
   <script src="/photos/perfectLayout.min.js"></script>
   <script src="/photos/panzoom.min.js"></script>
+  <script src="/photos/hammer.min.js"></script>
   <style type="text/css">
 html {
   background-color: black;
@@ -169,9 +170,27 @@ function back_to_gallery(i) {
 var preload_prev = new Image();
 var preload_next = new Image();
 
+var hammer = new Hammer(document.getElementById('fullimg_div'));
+hammer.get('swipe').set({ direction: Hammer.DIRECTION_ALL });
+var cur_img = 0;
+hammer.on("swipeleft", function(e) {
+  show_full(cur_img+1);
+});
+hammer.on("swipeup", function(e) {
+  show_full(cur_img+1);
+});
+hammer.on("swiperight", function(e) {
+  show_full(cur_img-1);
+});
+hammer.on("swipedown", function(e) {
+  show_full(cur_img-1);
+});
+
 function show_full(i) {
   if (i < 0) { back_to_gallery(0); return; }
   else if (i >= photos.length) { back_to_gallery(photos.length - 1); return; }
+
+  cur_img = i;
 
   const img = photos[i];
   $('#fullimg_div').css({
