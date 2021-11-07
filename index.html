@@ -7,7 +7,6 @@
   <script src="jquery.min.js"></script>
   <script src="perfectLayout.min.js"></script>
   <script src="panzoom.min.js"></script>
-  <script src="event_swipe.js"></script>
   <style type="text/css">
 html {
   background-color: black;
@@ -163,7 +162,10 @@ function perfect_resize() {
 }
 
 function back_to_gallery(i) {
+  console.log("back");
+  current_fullimg = -1;
   $(document).off("keydown");
+  screen.orientation.unlock();
   $('body').css({'overflow-y':'scroll'});
   $('#fullimg_div').css({
     'display': 'none'
@@ -172,40 +174,100 @@ function back_to_gallery(i) {
     'display': 'block'
   });
   perfect_resize();
-  screen.orientation.unlock();
   document.getElementById('img'+i).scrollIntoView();
 }
 
 var preload_prev = new Image();
 var preload_next = new Image();
 
+var current_fullimg = -1;
+
+var num_touches = 0;
+var multitouch = false;
+var ptdown_t;
+var ptdown_x;
+var ptdown_y;
+
+function handle_ptdown(e0) {
+  console.log("PTDOWN");
+  let e = e0.type == 'touchstart' ? e0.changedTouches[0] : e0.detail.originalEvent;
+  num_touches = num_touches + 1;
+  if (num_touches > 1) multitouch = true;
+  ptdown_t = new Date().getTime();
+  ptdown_x = e.pageX;
+  ptdown_y = e.pageY;
+}
+function handle_ptup(e0) {
+  console.log("PTUP");
+  let e = e0.type == 'touchend' ? e0.changedTouches[0] : e0.detail.originalEvent;
+  num_touches = num_touches - 1;
+  if (multitouch) {
+    if (num_touches == 0) multitouch = false;
+    return true;
+  }
+  let dt = new Date().getTime() - ptdown_t;
+  ptdown_t = null;
+  let dx = e.pageX - ptdown_x;
+  let dy = e.pageY - ptdown_y;
+  let dist = Math.sqrt(dx*dx + dy*dy);
+  let angle =
+      screen.width < screen.height ?
+      Math.atan2(-dy,dx) / Math.PI :
+      Math.atan2(-dx,-dy) / Math.PI;
+  console.log("MZUP "+dt+"ms "+dx+"dx "+dy+"dy "+dist+"px "+angle+"pi.rad");
+  if (dt < 100 || dist < 20) { // click
+    console.log("CLICK");
+    e0.stopImmediatePropagation();
+    e0.preventDefault();
+    back_to_gallery(current_fullimg);
+    console.log("CLACK");
+    return false;
+  }
+  else if (is_mobile && dt < 250 && dist > 100) { // swipe
+    if (angle > 1.0/3.0 || angle < -5.0/6.0) { // up or left
+      console.log("SWIPE LEFT/UP");
+      e0.stopImmediatePropagation();
+      e0.preventDefault();
+      show_full(current_fullimg + 1);
+    }
+    else if (angle < 1.0/6.0 && angle > -2.0/3.0) { // down or right
+      console.log("SWIPE DOWN/RIGHT");
+      e0.stopImmediatePropagation();
+      e0.preventDefault();
+      show_full(current_fullimg - 1);
+    }
+    else console.log("SWIPE INVALID");
+  }
+  else {
+    console.log("PAN/ZOOM?");
+    return true; // pan or zoom
+  }
+  return false;
+}
+
 function show_full(i) {
   if (i < 0) { back_to_gallery(0); return; }
-  else if (i >= photos.length) { back_to_gallery(photos.length - 1); return; }
+  else if (i >= photos.length) { back_to_gallery(photos.length - 2); return; }
+
+  current_fullimg = i;
 
   const img = photos[i];
   $('#fullimg_div').css({
     'display': 'block'
   });
   let cls = img.ratio > 1 ? "landscape" : "portrait";
-  screen.orientation.lock("any");
   $('body').css({'overflow-y':'auto'});
   $('#fullimg_div').empty()
-    .append('<div id="panzoom"><img id="full_img" class="'+cls+'" src="'+img.data.src+'"></img></div>')
-    .append('<div id="prev_btn"><span>◀</span></div>')
-    .append('<div id="next_btn"><span>▶</span></div>');
-  const panzoom = Panzoom(document.getElementById('panzoom'), {contain: 'outside', animate: true, step: 0.5});
-  document.getElementById('fullimg_div').addEventListener('wheel', panzoom.zoomWithWheel);
+    .append('<div id="panzoom"><img id="full_img" class="'+cls+'" src="'+img.data.src+'"></img></div>');
+  const panzoom = Panzoom(document.getElementById('panzoom'),
+                          {contain: 'outside',
+                           animate: true,
+                           step: 0.5,
+                           maxScale: 5,
+                          });
   $('#gallery').css({
     'display': 'none'
   });
-  $('#fullimg_div').off('click').click(function(){
-    if (panzoom.getScale() <= 1.0) back_to_gallery(i);
-  });
-  $('#prev_btn').off('click')
-    .click(function(e){show_full(i-1); e.stopPropagation();});
-  $('#next_btn').off('click')
-    .click(function(e){show_full(i+1); e.stopPropagation();});
   $(document).off("keydown").keydown(function(e) {
     switch (e.which) {
       case 37: case 8:
@@ -219,11 +281,21 @@ function show_full(i) {
         break;
     }
   });
-  $('#fullimg_div').off("swipe.all").on("swipe.all", (e) => {
-    switch (e.direction) {
-    case "up": case "left": show_full(i+1); break;
-    case "down": case "right": show_full(i-1); break;
-  }});
+  const fullimg = document.getElementById('panzoom');
+  if (is_mobile) {
+    fullimg.addEventListener('touchstart', handle_ptdown);
+    fullimg.addEventListener('touchend', handle_ptup);
+  }
+  else {
+    $('#fullimg_div')
+      .append('<div id="prev_btn"><span>◀</span></div>')
+      .append('<div id="next_btn"><span>▶</span></div>');
+    $('#prev_btn').off('click').click((e) => {e.stopPropagation(); show_full(i-1)});
+    $('#next_btn').off('click').click((e) => {e.stopPropagation(); show_full(i+1)});
+    fullimg.onwheel = panzoom.zoomWithWheel;
+    fullimg.addEventListener('panzoomstart', handle_ptdown);
+    fullimg.addEventListener('panzoomend', handle_ptup);
+  }
   $('#full_img').off('load').on('load', function() {
     if (i >= 1) preload_prev.src = photos[i-1].data.src;
     if (i < photos.length - 1) preload_next.src = photos[i+1].data.src;
@@ -234,11 +306,11 @@ function setFullScreen() {
   if ((document.fullScreenElement && document.fullScreenElement !== null) ||
       (!document.mozFullScreen && !document.webkitIsFullScreen)) {
     if (document.documentElement.requestFullScreen) {
-      document.documentElement.requestFullScreen();
+      return document.documentElement.requestFullScreen();
     } else if (document.documentElement.mozRequestFullScreen) {
-      document.documentElement.mozRequestFullScreen();
+      return document.documentElement.mozRequestFullScreen();
     } else if (document.documentElement.webkitRequestFullScreen) {
-      document.documentElement.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
+      return document.documentElement.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
     }
   }
 }
@@ -257,11 +329,23 @@ function start_gallery(album) {
     gallery.append(
       $('<img id="img'+img.data.index+'" class="image"></img>')
       .attr('src', img.src)
-      .click(function () {show_full(img.data.index);}));
+      .click(() => {
+        let show = () => {
+          screen.orientation.lock("portrait-primary")
+            .catch(() => {console.log("Could not lock orientation")})
+            .finally(() => {show_full(img.data.index);})
+        };
+        let p = setFullScreen();
+        if (p instanceof Promise) {
+          p.then(show).catch(() => {
+            console.log("Could not set fullscreen");
+            show_full(img.data.index);
+          })
+        } else show ();
+      }));
   });
   perfect_resize();
-  $(window).resize(perfect_resize);
-  $('body').click(setFullScreen);
+  $(window).resize(() => {if (current_fullimg < 0) perfect_resize()});
   $(window).scroll(function(){
     scroll_pos = $(window).scrollTop() / $(document).height();
   });
