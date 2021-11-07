@@ -77,6 +77,12 @@ body {
   animation: none;
 }
 @media only screen and (hover: none) and (pointer: coarse) {
+  #gallery {
+    margin: 1px;
+  }
+  .image {
+    margin: 1px;
+  }
   #prev_btn, #next_btn {
       animation: 1s fade-out forwards;
   }
@@ -99,16 +105,16 @@ body {
       #full_img.landscape {
           transform: rotate(90deg) translate(0,-100%);
           transform-origin: 0 0;
-          width: calc(100vh - 10px);
-          height: calc(100vw - 10px);
+          width: 100vh;
+          height: 100vw;
       }
   }
   @media (orientation: landscape) {
       #full_img.portrait {
           transform: rotate(-90deg) translate(-100%,0);
           transform-origin: 0 0;
-          width: calc(100vh - 10px);
-          height: calc(100vw - 10px);
+          width: 100vh;
+          height: 100vw;
       }
   }
 }
@@ -121,26 +127,29 @@ body {
 
 <script>
 
+const is_mobile = window.matchMedia("only screen and (hover: none) and (pointer: coarse)").matches;
+
 var photos = [];
 var scroll_pos = 0.;
 var last_width = 0;
 var last_height = 0;
 
 function perfect_resize() {
-  const width = document.getElementById("gallery").clientWidth - 6;
-  const height = Math.min(screen.height, 1080);
+  const margin = is_mobile ? 1 : 3;
+  const width = document.getElementById("gallery").clientWidth - 2*margin;
+  const height = Math.min(screen.height, 1080, screen.width);
 
   if (width === last_width && height === last_height) return;
   last_width = width;
   last_height = height;
 
-  const perfectRows = perfectLayout(photos, width, height, {margin: 3});
+  const perfectRows = perfectLayout(photos, width, height, {margin: margin});
 
   perfectRows.forEach(function (row) {
     var rem_width = width;
     row.forEach(function (img, i) {
       const w = (i == row.length - 1) ? rem_width - 1 : img.width;
-      rem_width -= w + 6;
+      rem_width -= w + 2*margin;
       $('#img'+img.data.index).css({
         'width': w + 'px',
         'height': img.height + 'px'
