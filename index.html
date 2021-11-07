@@ -4,9 +4,9 @@
   <title>Photos</title>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <script src="jquery.min.js"></script>
-  <script src="perfectLayout.min.js"></script>
-  <script src="panzoom.min.js"></script>
+  <script src="/photos/jquery.min.js"></script>
+  <script src="/photos/perfectLayout.min.js"></script>
+  <script src="/photos/panzoom.min.js"></script>
   <style type="text/css">
 html {
   background-color: black;
@@ -162,7 +162,6 @@ function perfect_resize() {
 }
 
 function back_to_gallery(i) {
-  console.log("back");
   current_fullimg = -1;
   $(document).off("keydown");
   screen.orientation.unlock();
@@ -189,7 +188,6 @@ var ptdown_x;
 var ptdown_y;
 
 function handle_ptdown(e0) {
-  console.log("PTDOWN");
   let e = e0.type == 'touchstart' ? e0.changedTouches[0] : e0.detail.originalEvent;
   num_touches = num_touches + 1;
   if (num_touches > 1) multitouch = true;
@@ -198,7 +196,6 @@ function handle_ptdown(e0) {
   ptdown_y = e.pageY;
 }
 function handle_ptup(e0) {
-  console.log("PTUP");
   let e = e0.type == 'touchend' ? e0.changedTouches[0] : e0.detail.originalEvent;
   num_touches = num_touches - 1;
   if (multitouch) {
@@ -214,34 +211,18 @@ function handle_ptup(e0) {
       screen.width < screen.height ?
       Math.atan2(-dy,dx) / Math.PI :
       Math.atan2(-dx,-dy) / Math.PI;
-  console.log("MZUP "+dt+"ms "+dx+"dx "+dy+"dy "+dist+"px "+angle+"pi.rad");
-  if (dt < 100 || dist < 20) { // click
-    console.log("CLICK");
-    e0.stopImmediatePropagation();
-    e0.preventDefault();
+  if (dt < 100 || dist < 20) // click
     back_to_gallery(current_fullimg);
-    console.log("CLACK");
-    return false;
-  }
   else if (is_mobile && dt < 250 && dist > 100) { // swipe
-    if (angle > 1.0/3.0 || angle < -5.0/6.0) { // up or left
-      console.log("SWIPE LEFT/UP");
-      e0.stopImmediatePropagation();
-      e0.preventDefault();
+    if (angle > 1.0/3.0 || angle < -5.0/6.0) // up or left
       show_full(current_fullimg + 1);
-    }
-    else if (angle < 1.0/6.0 && angle > -2.0/3.0) { // down or right
-      console.log("SWIPE DOWN/RIGHT");
-      e0.stopImmediatePropagation();
-      e0.preventDefault();
+    else if (angle < 1.0/6.0 && angle > -2.0/3.0) // down or right
       show_full(current_fullimg - 1);
-    }
-    else console.log("SWIPE INVALID");
   }
-  else {
-    console.log("PAN/ZOOM?");
+  else
     return true; // pan or zoom
-  }
+  e0.stopImmediatePropagation();
+  e0.preventDefault();
   return false;
 }
 
