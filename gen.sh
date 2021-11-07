@@ -19,6 +19,7 @@ mkdir -p "$DIR/thumbs"
 cp index.html "$DIR"
 # cp jquery.min.js "$DIR"
 # cp perfectLayout.min.js "$DIR"
+# cp panzoom.min.js "$DIR"
 
 echo "[" >"$OUT"
 i=0
