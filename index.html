@@ -4,10 +4,10 @@
   <title>Photos</title>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <script src="/photos/jquery.min.js"></script>
-  <script src="/photos/perfectLayout.min.js"></script>
-  <script src="/photos/panzoom.min.js"></script>
-  <script src="/photos/hammer.min.js"></script>
+  <script src="jquery.min.js"></script>
+  <script src="perfectLayout.min.js"></script>
+  <script src="panzoom.min.js"></script>
+  <script src="event_swipe.js"></script>
   <style type="text/css">
 html {
   background-color: black;
@@ -179,27 +179,9 @@ function back_to_gallery(i) {
 var preload_prev = new Image();
 var preload_next = new Image();
 
-var hammer = new Hammer(document.getElementById('fullimg_div'));
-hammer.get('swipe').set({ direction: Hammer.DIRECTION_ALL });
-var cur_img = 0;
-hammer.on("swipeleft", function(e) {
-  show_full(cur_img+1);
-});
-hammer.on("swipeup", function(e) {
-  show_full(cur_img+1);
-});
-hammer.on("swiperight", function(e) {
-  show_full(cur_img-1);
-});
-hammer.on("swipedown", function(e) {
-  show_full(cur_img-1);
-});
-
 function show_full(i) {
   if (i < 0) { back_to_gallery(0); return; }
   else if (i >= photos.length) { back_to_gallery(photos.length - 1); return; }
-
-  cur_img = i;
 
   const img = photos[i];
   $('#fullimg_div').css({
@@ -237,6 +219,11 @@ function show_full(i) {
         break;
     }
   });
+  $('#fullimg_div').off("swipe.all").on("swipe.all", (e) => {
+    switch (e.direction) {
+    case "up": case "left": show_full(i+1); break;
+    case "down": case "right": show_full(i-1); break;
+  }});
   $('#full_img').off('load').on('load', function() {
     if (i >= 1) preload_prev.src = photos[i-1].data.src;
     if (i < photos.length - 1) preload_next.src = photos[i+1].data.src;
