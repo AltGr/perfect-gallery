@@ -1,3 +1,5 @@
+! This repository has moved to https://gitlab.com/AltGr/perfect-gallery !
+
 A very simple  image gallery (HTML + js) based on
 [perfect-layout](https://github.com/axyz/perfect-layout)
 
